@@ -1,4 +1,5 @@
 const { retrieveTopics, addTopic } = require("../models/topic.model");
+const endpointsFile = require('../endpoints.json');
 
 exports.getAllTopics = (req, res) => {
   retrieveTopics().then((topics) => {
@@ -14,4 +15,8 @@ exports.postTopic = (req, res, next) => {
     }).catch((err) => {
         next(err);
     })
+}
+
+exports.getAllEndpoints = (req, res) => {
+    res.status(200).send(endpointsFile)
 }
