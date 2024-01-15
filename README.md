@@ -1,3 +1,3 @@
-# Northcoders News API
+# Running the portfolio locally
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+You will need to clone the repository to your machine and then you will need to add two files to your locally cloned repo in order to connect to two databases locally using PSQL. Add .env.test and .env.development and insert into each file PGDATABASE= with the correct database name for that specific environment. You can look in /db/setup.sql for the database names.
