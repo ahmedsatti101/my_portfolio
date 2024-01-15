@@ -1,11 +1,13 @@
 const express = require('express');
 const app = express();
-const {getAllTopics, postTopic} = require('./controllers/topic.controller');
+const {getAllTopics, postTopic, getAllEndpoints} = require('./controllers/topic.controller');
 
 app.use(express.json());
 
 app.get('/api/topics', getAllTopics);
 app.post('/api/topics', postTopic);
+
+app.get('/api', getAllEndpoints)
 
 app.use((err, req, res, next) => {
     const sqlErrors = ['23502']
