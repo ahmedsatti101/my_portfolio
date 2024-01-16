@@ -114,4 +114,54 @@ describe("/api", () => {
         });
     });
   });
+  describe("GET /articles/:article_id/comments", () => {
+    test("GET 200: Should respond with an array", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article.length).toBe(11);
+          expect(Array.isArray(article)).toBe(true);
+          article.forEach((response) => {
+            expect(typeof response.comment_id).toBe("number");
+            expect(typeof response.votes).toBe("number");
+            expect(typeof response.created_at).toBe("string");
+            expect(typeof response.author).toBe("string");
+            expect(typeof response.body).toBe("string");
+            expect(typeof response.article_id).toBe("number");
+          });
+        });
+    });
+
+    test("GET 200: Should respond with article array with comments sorted by most recent", () => {
+      return request(app)
+        .get("/api/articles/3/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toBeSortedBy("created_at", {
+            descending: true,
+          });
+        });
+    });
+
+    test("GET 404: Should respond with an error if passed a valid id but does not exist", () => {
+      return request(app)
+        .get("/api/articles/100/comments")
+        .expect(404)
+        .then((response) => {
+          expect(response.body.msg).toBe("Article not found");
+        });
+    });
+
+    test("GET 400: Should Should respond with an error if passed an invalid id", () => {
+      return request(app)
+        .get("/api/articles/not-an-id/comments")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+  });
 });

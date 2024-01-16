@@ -2,9 +2,9 @@ const {
   retrieveTopics,
   retrieveArticleById,
   retrieveArticles,
+  retrieveArticleComments,
 } = require("../models/topic.model");
 const endpointsFile = require("../endpoints.json");
-const addCommentCounts = require("../db/seeds/utils");
 const fs = require("fs/promises");
 
 exports.getAllTopics = (req, res) => {
@@ -67,4 +67,15 @@ exports.getAllArticles = (req, res) => {
       );
     });
   });
+};
+
+exports.getArticleComments = (req, res, next) => {
+  const { article_id } = req.params;
+  retrieveArticleComments(article_id)
+    .then((article) => {
+      res.status(200).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
