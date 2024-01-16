@@ -3,7 +3,8 @@ const {
   retrieveArticleById,
   retrieveArticles,
   retrieveArticleComments,
-  addComment
+  addComment,
+  updateArticle
 } = require("../models/topic.model");
 const endpointsFile = require("../endpoints.json");
 const fs = require("fs/promises");
@@ -98,7 +99,15 @@ exports.postComment = (req, res, next) => {
       res.status(201).send({ comment });
     })
     .catch(err => {
-      // console.log(err)
       next(err)
     })
+}
+
+exports.patchArticle = (req, res, next) => {
+  const updatedVotes = req.body.inc_votes;
+  const updatedArticleId = req.params.article_id;
+
+  updateArticle(updatedVotes, updatedArticleId).then((result) => {
+    res.status(200).send(result);
+  })
 }

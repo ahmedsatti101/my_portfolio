@@ -213,7 +213,7 @@ describe("/api", () => {
         .post("/api/articles/not-an-id/comments")
         .send({
           username: "icellusedkars",
-          body: "This should error"
+          body: "This should error",
         })
         .expect(400)
         .then((response) => {
@@ -231,6 +231,20 @@ describe("/api", () => {
         .expect(404)
         .then((response) => {
           expect(response.body.msg).toBe("Article not found");
+        });
+    });
+  });
+  describe("PATCH /articles/:article_id", () => {
+    test("PATCH 200: Should respond increment the votes and respond with updated article array", () => {
+      return request(app)
+        .patch("/api/articles/3")
+        .send({
+          inc_votes: 2,
+        })
+        .expect(200)
+        .then(({body}) => {
+          expect(typeof body.votes).toBe('number');
+          expect(body.votes).toEqual(4);
         });
     });
   });

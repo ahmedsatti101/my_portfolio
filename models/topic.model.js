@@ -1,5 +1,4 @@
 const db = require("../db/connection");
-const comments = require("../db/data/test-data/comments");
 
 exports.retrieveTopics = () => {
   return db.query(`SELECT * FROM topics;`).then((result) => {
@@ -81,4 +80,15 @@ exports.addComment = ({ body, article_id, author, votes, created_at }) => {
       }
       return result.rows;
     })
+}
+
+exports.updateArticle = (voteNum, article_id) => {
+  return db.query(`
+  UPDATE articles
+  SET votes = votes + $1
+  WHERE article_id = $2
+  RETURNING *;`, [voteNum, article_id])
+  .then((result) => {
+    return result.rows[0]
+  })
 }
