@@ -164,4 +164,74 @@ describe("/api", () => {
         });
     });
   });
+  describe("POST /articles/:article_id/comments", () => {
+    test("POST 201: Should send request body with username and body properties and respond with the sent request", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "icellusedkars",
+          body: "Interesting...",
+        })
+        .expect(201)
+        .then(({ body }) => {
+          const comments = body.comment;
+          comments.forEach((comment) => {
+            expect(comment.comment_id).toBe(19);
+            expect(comment.votes).toBe(0);
+            expect(typeof comment.created_at).toBe("string");
+            expect(comment.author).toBe("icellusedkars");
+            expect(comment.body).toBe("Interesting...");
+            expect(comment.article_id).toBe(1);
+          });
+        });
+    });
+
+    test("POST 400: Should respond with an error if an empty request body is sent", () => {
+      return request(app)
+        .post("/api/articles/3/comments")
+        .send()
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("POST 400: Should respond with an error if username or body is missing from the sent request", () => {
+      return request(app)
+        .post("/api/articles/3/comments")
+        .send({
+          body: "This is working?",
+        })
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("POST 400: Should Should respond with an error if passed an invalid id", () => {
+      return request(app)
+        .post("/api/articles/not-an-id/comments")
+        .send({
+          username: "icellusedkars",
+          body: "This should error"
+        })
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("POST 404: Should respond with an error if given a article valid id but does not exist", () => {
+      return request(app)
+        .post("/api/articles/100/comments")
+        .send({
+          username: "icellusedkars",
+          body: "This should error",
+        })
+        .expect(404)
+        .then((response) => {
+          expect(response.body.msg).toBe("Article not found");
+        });
+    });
+  });
 });
