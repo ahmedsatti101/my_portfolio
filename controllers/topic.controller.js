@@ -3,6 +3,7 @@ const {
   retrieveArticleById,
   retrieveArticles,
   retrieveArticleComments,
+  addComment
 } = require("../models/topic.model");
 const endpointsFile = require("../endpoints.json");
 const fs = require("fs/promises");
@@ -79,3 +80,25 @@ exports.getArticleComments = (req, res, next) => {
       next(err);
     });
 };
+
+exports.postComment = (req, res, next) => {
+  const {username, body} = req.body;
+  const articleId = req.params.article_id;
+  
+  const newComment = {
+      body,
+      article_id: articleId,
+      author: username,
+      votes: 0,
+      created_at: new Date()
+    };
+
+  addComment(newComment)
+    .then((comment) => {
+      res.status(201).send({ comment });
+    })
+    .catch(err => {
+      // console.log(err)
+      next(err)
+    })
+}

@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const comments = require("../db/data/test-data/comments");
 
 exports.retrieveTopics = () => {
   return db.query(`SELECT * FROM topics;`).then((result) => {
@@ -63,3 +64,21 @@ exports.retrieveArticleComments = (article_id) => {
       return result.rows;
     });
 };
+
+exports.addComment = ({ body, article_id, author, votes, created_at }) => {
+  return db.query(`
+  INSERT INTO comments
+    (body, article_id, author, votes, created_at)
+  VALUES
+    ($1, $2, $3, $4, $5)
+    RETURNING *`, [body, article_id, author, votes, created_at])
+    .then((result) => {
+      if (result.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "Article not found",
+        });
+      }
+      return result.rows;
+    })
+}
