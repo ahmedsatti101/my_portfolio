@@ -1,25 +1,39 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const {getAllTopics, postTopic, getAllEndpoints} = require('./controllers/topic.controller');
+const {
+  getAllTopics,
+  postTopic,
+  getAllEndpoints,
+  getArticleById,
+} = require("./controllers/topic.controller");
 
 app.use(express.json());
 
-app.get('/api/topics', getAllTopics);
-app.post('/api/topics', postTopic);
+app.get("/api/topics", getAllTopics);
 
-app.get('/api', getAllEndpoints)
+app.get("/api", getAllEndpoints);
+
+app.get("/api/articles/:article_id", getArticleById);
 
 app.use((err, req, res, next) => {
-    const sqlErrors = ['23502']
-    if (sqlErrors.includes(err.code)) {
-        res.status(400).send({msg: 'Bad request'})
-    } else {
-        next(err)
-    }
-})
+  if (err.msg && err.status) {
+    res.status(404).send({ msg: err.msg });
+  } else {
+    next(err)
+  }
+});
 
-app.use((err, req, res, next)=>{
-    res.status(500).send({msg: "Server error"})
-})
+app.use((err, req, res, next) => {
+  const sqlErrors = ["23502", "22P02"];
+  if (sqlErrors.includes(err.code)) {
+    res.status(400).send({ msg: "Bad request" });
+  } else {
+    next(err);
+  }
+});
+
+app.use((err, req, res, next) => {
+  res.status(500).send({ msg: "Server error" });
+});
 
 module.exports = app;

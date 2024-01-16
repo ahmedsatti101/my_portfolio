@@ -3,7 +3,7 @@ const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data/index");
 const db = require("../db/connection");
 const app = require("../app");
-const endpointsFile = require('../endpoints.json');
+const endpointsFile = require("../endpoints.json");
 
 beforeEach(() => {
   return seed(data);
@@ -30,6 +30,7 @@ describe("/api", () => {
         .expect(200)
         .then(({ body }) => {
           const { topics } = body;
+          expect(topics.length).toBe(3)
           expect(Array.isArray(topics)).toBe(true);
           topics.forEach((topic) => {
             expect(typeof topic.slug).toBe("string");
@@ -38,45 +39,39 @@ describe("/api", () => {
         });
     });
   });
-
-  describe("POST /topics", () => {
-    test("POST 201: post request to /api/topics will add a new topic", () => {
+  describe("GET /articles/:article_id", () => {
+    test("GET 200: sends an article to the client", () => {
       return request(app)
-        .post("/api/topics")
-        .send({
-          description: "what makes good code",
-          slug: "testing",
-        })
-        .expect(201)
-        .then(({ body }) => {
-          const topic = body.topic;
-          expect(topic).toEqual({
-            description: "what makes good code",
-            slug: "testing",
-          });
+        .get("/api/articles/3")
+        .expect(200)
+        .then((response) => {
+          expect(response.body.article.author).toBe('icellusedkars');
+          expect(response.body.article.title).toBe("Eight pug gifs that remind me of mitch");
+          expect(response.body.article.article_id).toBe(3);
+          expect(response.body.article.body).toBe('some gifs');
+          expect(response.body.article.topic).toBe('mitch');
+          expect(response.body.article.created_at).toBe('2020-11-03T09:12:00.000Z');
+          expect(response.body.article.votes).toBe(0);
+          expect(response.body.article.article_img_url).toBe('https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700');
         });
     });
 
-    test("POST 400: will respond with an error message if request body is missing required keys", () => {
-      return request(app)
-        .post("/api/topics")
-        .send({
-          description: "something that hops",
+    test('GET 404: sends an appropriate status and error message when given a valid id but does not exist', () => {
+        return request(app)
+        .get('/api/articles/100')
+        .expect(404)
+        .then((response) => {
+            expect(response.body.msg).toBe('Article not found')
         })
+    })
+
+    test('GET 400: sends an appropriate status and error message when given an invalid id', () => {
+        return request(app)
+        .get('/api/articles/banana')
         .expect(400)
         .then((response) => {
-          expect(response.body.msg).toBe("Bad request");
-        });
-    });
-
-    test("POST 400: will respond with an error message if no request body is given", () => {
-      return request(app)
-        .post("/api/topics")
-        .send()
-        .expect(400)
-        .then((response) => {
-          expect(response.body.msg).toBe("Bad request");
-        });
-    });
+            expect(response.body.msg).toBe('Bad request')
+        })
+    })
   });
 });
