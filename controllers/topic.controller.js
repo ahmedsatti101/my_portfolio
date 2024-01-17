@@ -4,10 +4,10 @@ const {
   retrieveArticles,
   retrieveArticleComments,
   addComment,
-  updateArticle
+  updateArticle,
+  deleteComment
 } = require("../models/topic.model");
 const endpointsFile = require("../endpoints.json");
-const fs = require("fs/promises");
 
 exports.getAllTopics = (req, res) => {
   retrieveTopics().then((topics) => {
@@ -86,7 +86,15 @@ exports.patchArticle = (req, res, next) => {
   updateArticle(updatedVotes, updatedArticleId).then((result) => {
     res.status(200).send(result);
   }).catch(err => {
-    // console.log(err)
     next(err)
+  })
+}
+
+exports.deletedComment = (req, res, next) => {
+  const commentId = req.params.comment_id;
+  deleteComment(commentId).then((result) => {
+    res.status(204).send(result)
+  }).catch(err => {
+    next(err);
   })
 }

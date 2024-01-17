@@ -242,37 +242,37 @@ describe("/api", () => {
           inc_votes: 1,
         })
         .expect(200)
-        .then(({body}) => {
-          expect(typeof body.votes).toBe('number');
+        .then(({ body }) => {
+          expect(typeof body.votes).toBe("number");
           expect(body.votes).toEqual(101);
         });
     });
 
-    test("PATCH 200: Should increment the votes and respond with updated article array", () => {
+    test("PATCH 200: Should increment the votes and respond with updated article array for a different article", () => {
       return request(app)
         .patch("/api/articles/3")
         .send({
           inc_votes: 2,
         })
         .expect(200)
-        .then(({body}) => {
-          expect(typeof body.votes).toBe('number');
+        .then(({ body }) => {
+          expect(typeof body.votes).toBe("number");
           expect(body.votes).toEqual(2);
         });
     });
 
-    test('PATCH 200: Should decrement the votes and respond with updated article array', () => {
+    test("PATCH 200: Should decrement the votes and respond with updated article array", () => {
       return request(app)
-      .patch('/api/articles/1')
-      .send({
-        inc_votes: -60
-      })
-      .expect(200)
-      .then(({body}) => {
-        expect(typeof body.votes).toBe('number');
-        expect(body.votes).toEqual(40);
-      })
-    })
+        .patch("/api/articles/1")
+        .send({
+          inc_votes: -60,
+        })
+        .expect(200)
+        .then(({ body }) => {
+          expect(typeof body.votes).toBe("number");
+          expect(body.votes).toEqual(40);
+        });
+    });
 
     test("PATCH 400: Should respond with an error if an empty request body is sent", () => {
       return request(app)
@@ -300,7 +300,7 @@ describe("/api", () => {
       return request(app)
         .patch("/api/articles/not-an-id")
         .send({
-          inc_votes: 56
+          inc_votes: 56,
         })
         .expect(400)
         .then((response) => {
@@ -312,11 +312,26 @@ describe("/api", () => {
       return request(app)
         .patch("/api/articles/1000")
         .send({
-          inc_votes: 5
+          inc_votes: 5,
         })
         .expect(404)
         .then((response) => {
           expect(response.body.msg).toBe("Article not found");
+        });
+    });
+  });
+  describe("DELETE /api/comments/:comment_id", () => {
+    test("DELETE 204: Should delete given comment by comment_id", () => {
+      return request(app).delete("/api/comments/1").send().expect(204);
+    });
+
+    test("DELETE 400: Should respond with an error if given an invalid comment id", () => {
+      return request(app)
+        .delete("/api/comments/not-an-id")
+        .send()
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
         });
     });
   });

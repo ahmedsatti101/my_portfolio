@@ -7,7 +7,8 @@ const {
   getAllArticles,
   getArticleComments,
   postComment,
-  patchArticle
+  patchArticle,
+  deletedComment
 } = require("./controllers/topic.controller");
 
 app.use(express.json());
@@ -25,6 +26,8 @@ app.get("/api/articles/:article_id/comments", getArticleComments);
 app.post("/api/articles/:article_id/comments", postComment);
 
 app.patch("/api/articles/:article_id", patchArticle);
+
+app.delete("/api/comments/:comment_id", deletedComment);
 
 app.use((err, req, res, next) => {
   if (err.msg && err.status) {
