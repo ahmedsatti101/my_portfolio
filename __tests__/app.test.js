@@ -341,7 +341,7 @@ describe("/api", () => {
         .get("/api/users")
         .expect(200)
         .then(({ body }) => {
-          const {users} = body;
+          const { users } = body;
           expect(users.length).toBe(4);
           expect(Array.isArray(users)).toBe(true);
           users.forEach((user) => {
@@ -353,24 +353,56 @@ describe("/api", () => {
     });
 
     test("GET 404: Should respond with an error if navigated to the wrong endpoint", () => {
-      return request(app)
-        .get("/api/user")
-        .expect(404)
+      return request(app).get("/api/user").expect(404);
     });
   });
-  describe.only('GET /api/articles?topic=', () => {
-    test('GET 200: filters the data by passed topic query parameter of cats', () => {
+  describe("GET /api/articles?topic=", () => {
+    test("GET 200: filters the data by passed topic query parameter of cats", () => {
       return request(app)
-      .get('/api/articles?topic=cats')
-      .expect(200)
-      .then(({body}) => {
-        const topic = body.articles;
-        // console.log(topic)
-        expect(topic.length).toBe(1)
-        expect(topic[0]).toHaveProperty("slug");
-        expect(topic[0].slug).toBe("cats");
-        expect(topic[0]).toHaveProperty("description");
-      })
-    })
-  })
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({ body }) => {
+          const articles = body.articles;
+          expect(articles.length).toBe(2);
+          articles.forEach((article) => {
+            expect(article).toHaveProperty("topic");
+            expect(article.topic).toBe("cats");
+            expect(article).toHaveProperty("article_id");
+            expect(article).toHaveProperty("title");
+            expect(article).toHaveProperty("author");
+            expect(article).toHaveProperty("created_at");
+            expect(article).toHaveProperty("votes");
+            expect(article).toHaveProperty("article_img_url");
+            expect(article).toHaveProperty("comment_count");
+          });
+        });
+    });
+
+    test("GET 404: Should send error for invalid value for topic query parameter", () => {
+      return request(app)
+        .get("/api/treasures?topic=banana")
+        .expect(404)
+    });
+
+    test("GET 200: Should respond with an array of article objects if no query is given", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(18);
+          expect(Array.isArray(articles)).toBe(true);
+          articles.forEach((article) => {
+            expect(typeof article.article_id).toBe("number");
+            expect(typeof article.title).toBe("string");
+            expect(typeof article.topic).toBe("string");
+            expect(typeof article.author).toBe("string");
+            expect(typeof article.created_at).toBe("string");
+            expect(typeof article.votes).toBe("number");
+            expect(typeof article.article_img_url).toBe("string");
+            expect(typeof article.comment_count).toBe("number");
+          });
+        });
+    });
+  });
 });

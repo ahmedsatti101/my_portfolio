@@ -32,8 +32,7 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getAllArticles = (req, res, next) => {
-  const topic = req.body;
-  // console.log(topic)
+  const topic = req.query.topic;
   const formattedArticleData = [];
   const countArticles = {};
   retrieveArticles(topic).then((articles) => {
@@ -47,7 +46,9 @@ exports.getAllArticles = (req, res, next) => {
       });
     });
     res.status(200).send({ articles: formattedArticleData });
-  });
+  }).catch(err => {
+    next(err)
+  })
 };
 
 exports.getArticleComments = (req, res, next) => {
