@@ -65,12 +65,16 @@ exports.retrieveArticleComments = (article_id) => {
 };
 
 exports.addComment = ({ body, article_id, author, votes, created_at }) => {
-  return db.query(`
+  return db
+    .query(
+      `
   INSERT INTO comments
     (body, article_id, author, votes, created_at)
   VALUES
     ($1, $2, $3, $4, $5)
-    RETURNING *`, [body, article_id, author, votes, created_at])
+    RETURNING *`,
+      [body, article_id, author, votes, created_at]
+    )
     .then((result) => {
       if (result.rows.length === 0) {
         return Promise.reject({
@@ -79,16 +83,27 @@ exports.addComment = ({ body, article_id, author, votes, created_at }) => {
         });
       }
       return result.rows;
-    })
-}
+    });
+};
 
 exports.updateArticle = (voteNum, article_id) => {
-  return db.query(`
+  return db
+    .query(
+      `
   UPDATE articles
   SET votes = votes + $1
   WHERE article_id = $2
-  RETURNING *;`, [voteNum, article_id])
-  .then((result) => {
-    return result.rows[0]
-  })
-}
+  RETURNING *;`,
+      [voteNum, article_id]
+    )
+    .then((result) => {
+      if (result.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "Article not found",
+        });
+      }
+      // console.log(result.rows)
+      return result.rows[0];
+    });
+};

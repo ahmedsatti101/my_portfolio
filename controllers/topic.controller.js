@@ -24,18 +24,6 @@ exports.getArticleById = (req, res, next) => {
   retrieveArticleById(article_id)
     .then((article) => {
       res.status(200).send({ article });
-      fs.readFile("./endpoints.json", "utf-8").then((endpoint) => {
-        const parsedData = JSON.parse(endpoint);
-        parsedData["GET /api/articles:article_id"] = {
-          description: "get an article by its id",
-          queries: [],
-          exampleResponse: [{ article }],
-        };
-        return fs.writeFile(
-          "./endpoints.json",
-          JSON.stringify(parsedData, null, 2)
-        );
-      });
     })
     .catch((err) => {
       next(err);
@@ -56,18 +44,6 @@ exports.getAllArticles = (req, res) => {
       });
     });
     res.status(200).send({ articles: formattedArticleData });
-    fs.readFile("./endpoints.json", "utf-8").then((endpoint) => {
-      const parsedData = JSON.parse(endpoint);
-      parsedData["GET /api/articles"] = {
-        description: "get all articles",
-        queries: [],
-        exampleResponse: [{ articles: formattedArticleData }],
-      };
-      return fs.writeFile(
-        "./endpoints.json",
-        JSON.stringify(parsedData, null, 2)
-      );
-    });
   });
 };
 
@@ -109,5 +85,8 @@ exports.patchArticle = (req, res, next) => {
 
   updateArticle(updatedVotes, updatedArticleId).then((result) => {
     res.status(200).send(result);
+  }).catch(err => {
+    // console.log(err)
+    next(err)
   })
 }
