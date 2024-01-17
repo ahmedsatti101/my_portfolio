@@ -5,8 +5,8 @@ const {
   retrieveArticleComments,
   addComment,
   updateArticle,
-  deleteComment,
-  retrieveUsers
+  deletedComment,
+  retrieveUsers,
 } = require("../models/topic.model");
 const endpointsFile = require("../endpoints.json");
 
@@ -33,22 +33,14 @@ exports.getArticleById = (req, res, next) => {
 
 exports.getAllArticles = (req, res, next) => {
   const topic = req.query.topic;
-  const formattedArticleData = [];
-  const countArticles = {};
-  retrieveArticles(topic).then((articles) => {
-    articles.forEach((article) => {
-      const articleId = article.article_id;
-      countArticles[articleId] = (countArticles[articleId] || 0) + 1;
 
-      formattedArticleData.push({
-        ...article,
-        comment_count: countArticles[articleId],
-      });
+  retrieveArticles(topic)
+    .then((articles) => {
+      res.status(200).send({ articles });
+    })
+    .catch((err) => {
+      next(err);
     });
-    res.status(200).send({ articles: formattedArticleData });
-  }).catch(err => {
-    next(err)
-  })
 };
 
 exports.getArticleComments = (req, res, next) => {
@@ -63,48 +55,51 @@ exports.getArticleComments = (req, res, next) => {
 };
 
 exports.postComment = (req, res, next) => {
-  const {username, body} = req.body;
+  const { username, body } = req.body;
   const articleId = req.params.article_id;
-  
+
   const newComment = {
-      body,
-      article_id: articleId,
-      author: username,
-      votes: 0,
-      created_at: new Date()
-    };
+    body,
+    article_id: articleId,
+    author: username,
+  };
 
   addComment(newComment)
     .then((comment) => {
       res.status(201).send({ comment });
     })
-    .catch(err => {
-      next(err)
-    })
-}
+    .catch((err) => {
+      next(err);
+    });
+};
 
 exports.patchArticle = (req, res, next) => {
   const updatedVotes = req.body.inc_votes;
   const updatedArticleId = req.params.article_id;
 
-  updateArticle(updatedVotes, updatedArticleId).then((result) => {
-    res.status(200).send(result);
-  }).catch(err => {
-    next(err)
-  })
-}
+  updateArticle(updatedVotes, updatedArticleId)
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
 
-exports.deletedComment = (req, res, next) => {
+exports.deleteCommentById = (req, res, next) => {
   const commentId = req.params.comment_id;
-  deleteComment(commentId).then((result) => {
-    res.status(204).send(result)
-  }).catch(err => {
-    next(err);
-  })
-}
+
+  deletedComment(commentId)
+    .then((result) => {
+      res.status(204).send(result);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
 
 exports.getAllUsers = (req, res) => {
   retrieveUsers().then((users) => {
-    res.status(200).send({users})
-  })
-}
+    res.status(200).send({ users });
+  });
+};

@@ -23,23 +23,21 @@ exports.retrieveArticleById = (article_id) => {
 exports.retrieveArticles = (topic) => {
   const queryValues = [];
   let queryStr = `
-  SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url 
+  SELECT articles.*, COUNT(comment_id) AS comment_count
   FROM articles 
-  JOIN comments 
-  ON articles.article_id = comments.article_id`
-  
+  LEFT JOIN comments 
+  ON articles.article_id = comments.article_id`;
+
   if (topic) {
     queryValues.push(topic);
-    queryStr += ` WHERE topic = $1`
+    queryStr += ` WHERE topic = $1`;
   }
-  
-  queryStr += ` ORDER BY articles.created_at DESC`
-  
-  return db
-  .query(queryStr, queryValues)
-  .then((result) => {
-      return result.rows;
-    });
+
+  queryStr += ` GROUP BY articles.article_id ORDER BY articles.created_at DESC`;
+
+  return db.query(queryStr, queryValues).then((result) => {
+    return result.rows;
+  });
 };
 
 exports.retrieveArticleComments = (article_id) => {
@@ -76,16 +74,16 @@ exports.retrieveArticleComments = (article_id) => {
     });
 };
 
-exports.addComment = ({ body, article_id, author, votes, created_at }) => {
+exports.addComment = ({ body, article_id, author }) => {
   return db
     .query(
       `
   INSERT INTO comments
-    (body, article_id, author, votes, created_at)
+    (body, article_id, author)
   VALUES
-    ($1, $2, $3, $4, $5)
+    ($1, $2, $3)
     RETURNING *`,
-      [body, article_id, author, votes, created_at]
+      [body, article_id, author]
     )
     .then((result) => {
       if (result.rows.length === 0) {
@@ -119,15 +117,20 @@ exports.updateArticle = (voteNum, article_id) => {
     });
 };
 
-exports.deleteComment = (comment_id) => {
-  return db.query(`DELETE FROM comments
-  WHERE comment_id = $1`, [comment_id]).then((result)=> {
-    return result.rows;
-  })
-}
+exports.deletedComment = (comment_id) => {
+  return db
+    .query(
+      `DELETE FROM comments
+  WHERE comment_id = $1`,
+      [comment_id]
+    )
+    .then((result) => {
+      return result.rows;
+    });
+};
 
 exports.retrieveUsers = () => {
   return db.query(`SELECT * FROM users;`).then((result) => {
     return result.rows;
-  })
-}
+  });
+};
