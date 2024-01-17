@@ -424,4 +424,23 @@ describe("/api", () => {
         });
     });
   });
+  describe.skip("GET /api/articles/:article_id?comment_count", () => {
+    test("GET 200: Should respond with the comment count for an article object", () => {
+      return request(app)
+        .get("/api/articles/1?comment_count")
+        .expect(200)
+        .then(({ body }) => {
+          const {article} = body;
+          expect(article).toHaveProperty("author");
+          expect(article).toHaveProperty("title");
+          expect(article).toHaveProperty("article_id");
+          expect(article).toHaveProperty("body");
+          expect(article).toHaveProperty("topic");
+          expect(article).toHaveProperty("created_at");
+          expect(article).toHaveProperty("votes");
+          expect(article).toHaveProperty("article_img_url");
+          expect(article).toHaveProperty("comment_count");
+        });
+    });
+  });
 });
