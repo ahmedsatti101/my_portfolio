@@ -358,4 +358,19 @@ describe("/api", () => {
         .expect(404)
     });
   });
+  describe.only('GET /api/articles?topic=', () => {
+    test('GET 200: filters the data by passed topic query parameter of cats', () => {
+      return request(app)
+      .get('/api/articles?topic=cats')
+      .expect(200)
+      .then(({body}) => {
+        const topic = body.articles;
+        // console.log(topic)
+        expect(topic.length).toBe(1)
+        expect(topic[0]).toHaveProperty("slug");
+        expect(topic[0].slug).toBe("cats");
+        expect(topic[0]).toHaveProperty("description");
+      })
+    })
+  })
 });
