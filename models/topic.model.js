@@ -103,7 +103,13 @@ exports.updateArticle = (voteNum, article_id) => {
           msg: "Article not found",
         });
       }
-      // console.log(result.rows)
       return result.rows[0];
     });
 };
+
+exports.deleteComment = (comment_id) => {
+  return db.query(`DELETE FROM comments
+  WHERE comment_id = $1`, [comment_id]).then((result)=> {
+    return result.rows;
+  })
+}
