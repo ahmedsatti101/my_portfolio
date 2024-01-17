@@ -5,7 +5,8 @@ const {
   retrieveArticleComments,
   addComment,
   updateArticle,
-  deleteComment
+  deleteComment,
+  retrieveUsers
 } = require("../models/topic.model");
 const endpointsFile = require("../endpoints.json");
 
@@ -96,5 +97,11 @@ exports.deletedComment = (req, res, next) => {
     res.status(204).send(result)
   }).catch(err => {
     next(err);
+  })
+}
+
+exports.getAllUsers = (req, res) => {
+  retrieveUsers().then((users) => {
+    res.status(200).send({users})
   })
 }

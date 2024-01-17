@@ -335,4 +335,27 @@ describe("/api", () => {
         });
     });
   });
+  describe("GET /api/users", () => {
+    test("GET 200: Should respond with an array of all user object with the correct properties", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(({ body }) => {
+          const {users} = body;
+          expect(users.length).toBe(4);
+          expect(Array.isArray(users)).toBe(true);
+          users.forEach((user) => {
+            expect(user).toHaveProperty("username");
+            expect(user).toHaveProperty("name");
+            expect(user).toHaveProperty("avatar_url");
+          });
+        });
+    });
+
+    test("GET 404: Should respond with an error if navigated to the wrong endpoint", () => {
+      return request(app)
+        .get("/api/user")
+        .expect(404)
+    });
+  });
 });
