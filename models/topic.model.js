@@ -20,12 +20,24 @@ exports.retrieveArticleById = (article_id) => {
     });
 };
 
-exports.retrieveArticles = () => {
+exports.retrieveArticles = (topic) => {
+  const queryValues = [];
+  let queryStr = `
+  SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url 
+  FROM articles 
+  JOIN comments 
+  ON articles.article_id = comments.article_id`
+  
+  if (topic) {
+    queryValues.push(topic);
+    queryStr += ` WHERE topic = $1`
+  }
+  
+  queryStr += ` ORDER BY articles.created_at DESC`
+  
   return db
-    .query(
-      `SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url FROM articles JOIN comments ON articles.article_id = comments.article_id ORDER BY articles.created_at DESC;`
-    )
-    .then((result) => {
+  .query(queryStr, queryValues)
+  .then((result) => {
       return result.rows;
     });
 };

@@ -31,10 +31,11 @@ exports.getArticleById = (req, res, next) => {
     });
 };
 
-exports.getAllArticles = (req, res) => {
+exports.getAllArticles = (req, res, next) => {
+  const topic = req.query.topic;
   const formattedArticleData = [];
   const countArticles = {};
-  retrieveArticles().then((articles) => {
+  retrieveArticles(topic).then((articles) => {
     articles.forEach((article) => {
       const articleId = article.article_id;
       countArticles[articleId] = (countArticles[articleId] || 0) + 1;
@@ -45,7 +46,9 @@ exports.getAllArticles = (req, res) => {
       });
     });
     res.status(200).send({ articles: formattedArticleData });
-  });
+  }).catch(err => {
+    next(err)
+  })
 };
 
 exports.getArticleComments = (req, res, next) => {
