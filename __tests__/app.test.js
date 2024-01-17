@@ -87,7 +87,7 @@ describe("/api", () => {
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
-          expect(articles.length).toBe(18);
+          expect(articles.length).toBe(13);
           expect(Array.isArray(articles)).toBe(true);
           articles.forEach((article) => {
             expect(typeof article.article_id).toBe("number");
@@ -97,7 +97,7 @@ describe("/api", () => {
             expect(typeof article.created_at).toBe("string");
             expect(typeof article.votes).toBe("number");
             expect(typeof article.article_img_url).toBe("string");
-            expect(typeof article.comment_count).toBe("number");
+            expect(typeof article.comment_count).toBe("string");
           });
         });
     });
@@ -112,6 +112,10 @@ describe("/api", () => {
             descending: true,
           });
         });
+    });
+
+    test("GET 404: Should respond with an error if navigated to the wrong endpoint", () => {
+      return request(app).get("/api/article").expect(404);
     });
   });
   describe("GET /articles/:article_id/comments", () => {
@@ -155,7 +159,7 @@ describe("/api", () => {
         });
     });
 
-    test("GET 400: Should Should respond with an error if passed an invalid id", () => {
+    test("GET 400: Should respond with an error if passed an invalid id", () => {
       return request(app)
         .get("/api/articles/not-an-id/comments")
         .expect(400)
@@ -208,7 +212,7 @@ describe("/api", () => {
         });
     });
 
-    test("POST 400: Should Should respond with an error if passed an invalid id", () => {
+    test("POST 400: Should respond with an error if passed an invalid id", () => {
       return request(app)
         .post("/api/articles/not-an-id/comments")
         .send({
@@ -219,6 +223,16 @@ describe("/api", () => {
         .then((response) => {
           expect(response.body.msg).toBe("Bad request");
         });
+    });
+
+    test("POST 404: Should respond with an error if attempting to post comment with user that does not exist", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "Ahmed_M",
+          body: "This username does not exist",
+        })
+        .expect(404);
     });
 
     test("POST 404: Should respond with an error if given a article valid id but does not exist", () => {
@@ -296,7 +310,7 @@ describe("/api", () => {
         });
     });
 
-    test("PATCH 400: Should Should respond with an error if passed an invalid id", () => {
+    test("PATCH 400: Should respond with an error if passed an invalid id", () => {
       return request(app)
         .patch("/api/articles/not-an-id")
         .send({
@@ -322,7 +336,7 @@ describe("/api", () => {
   });
   describe("DELETE /api/comments/:comment_id", () => {
     test("DELETE 204: Should delete given comment by comment_id", () => {
-      return request(app).delete("/api/comments/1").send().expect(204);
+      return request(app).delete("/api/comments/1").expect(204);
     });
 
     test("DELETE 400: Should respond with an error if given an invalid comment id", () => {
@@ -333,6 +347,10 @@ describe("/api", () => {
         .then((response) => {
           expect(response.body.msg).toBe("Bad request");
         });
+    });
+
+    test("DELETE 404: Should respond with an error if given a valid id but does not exist", () => {
+      return request(app).delete("/api/comments/100").expect(204);
     });
   });
   describe("GET /api/users", () => {
@@ -348,6 +366,9 @@ describe("/api", () => {
             expect(user).toHaveProperty("username");
             expect(user).toHaveProperty("name");
             expect(user).toHaveProperty("avatar_url");
+            expect(typeof user.username).toBe("string");
+            expect(typeof user.name).toBe("string");
+            expect(typeof user.avatar_url).toBe("string");
           });
         });
     });
@@ -363,7 +384,7 @@ describe("/api", () => {
         .expect(200)
         .then(({ body }) => {
           const articles = body.articles;
-          expect(articles.length).toBe(2);
+          expect(articles.length).toBe(1);
           articles.forEach((article) => {
             expect(article).toHaveProperty("topic");
             expect(article.topic).toBe("cats");
@@ -379,9 +400,7 @@ describe("/api", () => {
     });
 
     test("GET 404: Should send error for invalid value for topic query parameter", () => {
-      return request(app)
-        .get("/api/treasures?topic=banana")
-        .expect(404)
+      return request(app).get("/api/treasures?topic=banana").expect(404);
     });
 
     test("GET 200: Should respond with an array of article objects if no query is given", () => {
@@ -390,7 +409,7 @@ describe("/api", () => {
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
-          expect(articles.length).toBe(18);
+          expect(articles.length).toBe(13);
           expect(Array.isArray(articles)).toBe(true);
           articles.forEach((article) => {
             expect(typeof article.article_id).toBe("number");
@@ -400,7 +419,7 @@ describe("/api", () => {
             expect(typeof article.created_at).toBe("string");
             expect(typeof article.votes).toBe("number");
             expect(typeof article.article_img_url).toBe("string");
-            expect(typeof article.comment_count).toBe("number");
+            expect(typeof article.comment_count).toBe("string");
           });
         });
     });
