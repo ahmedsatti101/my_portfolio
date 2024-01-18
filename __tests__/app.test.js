@@ -4,6 +4,7 @@ const data = require("../db/data/test-data/index");
 const db = require("../db/connection");
 const app = require("../app");
 const endpointsFile = require("../endpoints.json");
+const { expect } = require("@jest/globals");
 
 beforeEach(() => {
   return seed(data);
@@ -467,6 +468,40 @@ describe("/api", () => {
         .then((response) => {
           expect(response.body.msg).toBe("Bad request");
         });
+    });
+  });
+  describe("GET /api/articles (sorting queries)", () => {
+    test("GET 200: Will accept a sort_by query parameter that sorts to created_at by default in a descending order", () => {
+      return request(app)
+        .get("/api/articles?sort_by=created_at")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+
+    test("GET 200: Will accept a query parameter of order that orders in ascending order (defaults to descending)", () => {
+      return request(app)
+        .get("/api/articles?sort_by=created_at&order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSortedBy("created_at", {
+            descending: false,
+            coerce: true,
+          });
+        });
+    });
+
+    test("GET 404: sends an appropriate status and error message when given an invalid value for sort_by query parameter", () => {
+      return request(app).get("/api/articles?sort_by=banana").expect(404);
+    });
+
+    test("GET 400: sends an appropriate status and error message when given an invalid value for order query parameter", () => {
+      return request(app)
+        .get("/api/articles?sort_by=created_at&order=colour")
+        .expect(404)
     });
   });
 });

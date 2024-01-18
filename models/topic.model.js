@@ -31,7 +31,7 @@ exports.retrieveArticleById = (article_id) => {
   });
 };
 
-exports.retrieveArticles = (topic) => {
+exports.retrieveArticles = (topic, sortBy = "created_at", order = "desc") => {
   const queryValues = [];
   let queryStr = `
   SELECT articles.*, COUNT(comment_id) AS comment_count
@@ -44,7 +44,34 @@ exports.retrieveArticles = (topic) => {
     queryStr += ` WHERE topic = $1`;
   }
 
-  queryStr += ` GROUP BY articles.article_id ORDER BY articles.created_at DESC`;
+  queryStr += ` GROUP BY articles.article_id ORDER BY articles.${sortBy} ${order}`;
+
+  const validSortQueries = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    "body",
+    "created_at",
+    "votes",
+    "article_img_url"
+  ];
+
+  if (!validSortQueries.includes(sortBy)) {
+    return Promise.reject({
+      status: 404,
+      msg: "Not found",
+    });
+  }
+
+  const validOrderQueries = ["asc", "desc"];
+
+  if (!validOrderQueries.includes(order)) {
+    return Promise.reject({
+      status: 404,
+      msg: "Not found",
+    });
+  }
 
   return db.query(queryStr, queryValues).then((result) => {
     return result.rows;

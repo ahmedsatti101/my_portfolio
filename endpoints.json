@@ -17,7 +17,7 @@
   "GET /api/articles": {
     "description": "get all articles",
     "queries": [
-      "topic"
+      "topic", "sort_by", "order"
     ],
     "exampleResponse": [
       {
