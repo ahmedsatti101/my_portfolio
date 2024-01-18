@@ -7,7 +7,7 @@ const {
   updateArticle,
   deletedComment,
   retrieveUsers,
-} = require("../models/topic.model");
+} = require("../models/app.model");
 const endpointsFile = require("../endpoints.json");
 
 exports.getAllTopics = (req, res) => {

@@ -4,7 +4,6 @@ const data = require("../db/data/test-data/index");
 const db = require("../db/connection");
 const app = require("../app");
 const endpointsFile = require("../endpoints.json");
-const { expect } = require("@jest/globals");
 
 beforeEach(() => {
   return seed(data);
@@ -501,7 +500,7 @@ describe("/api", () => {
     test("GET 400: sends an appropriate status and error message when given an invalid value for order query parameter", () => {
       return request(app)
         .get("/api/articles?sort_by=created_at&order=colour")
-        .expect(404)
+        .expect(404);
     });
   });
 });
