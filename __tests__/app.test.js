@@ -45,20 +45,26 @@ describe("/api", () => {
         .get("/api/articles/3")
         .expect(200)
         .then((response) => {
-          expect(response.body.article.author).toBe("icellusedkars");
-          expect(response.body.article.title).toBe(
-            "Eight pug gifs that remind me of mitch"
-          );
-          expect(response.body.article.article_id).toBe(3);
-          expect(response.body.article.body).toBe("some gifs");
-          expect(response.body.article.topic).toBe("mitch");
-          expect(response.body.article.created_at).toBe(
-            "2020-11-03T09:12:00.000Z"
-          );
-          expect(response.body.article.votes).toBe(0);
-          expect(response.body.article.article_img_url).toBe(
-            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-          );
+          const article = response.body.article;
+          expect(Array.isArray(article)).toBe(true);
+          expect(article.length).toBe(1);
+          article.forEach((object) => {
+            expect(object.author).toBe("icellusedkars");
+            expect(object.title).toBe(
+              "Eight pug gifs that remind me of mitch"
+            );
+            expect(object.article_id).toBe(3);
+            expect(object.body).toBe("some gifs");
+            expect(object.topic).toBe("mitch");
+            expect(object.created_at).toBe(
+              "2020-11-03T09:12:00.000Z"
+            );
+            expect(object.votes).toBe(0);
+            expect(object.article_img_url).toEqual(
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+            );
+
+          })
         });
     });
 
@@ -421,6 +427,47 @@ describe("/api", () => {
             expect(typeof article.article_img_url).toBe("string");
             expect(typeof article.comment_count).toBe("string");
           });
+        });
+    });
+  });
+  describe("GET /api/articles/:article_id (comment_count)", () => {
+    test("GET 200: Should respond with the comment count for an article array", () => {
+      return request(app)
+        .get("/api/articles/5")
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(Array.isArray(article)).toBe(true);
+          expect(article.length).toBe(1);
+          article.forEach((object) => {
+            expect(object).toHaveProperty("author");
+            expect(object).toHaveProperty("title");
+            expect(object).toHaveProperty("article_id");
+            expect(object).toHaveProperty("body");
+            expect(object).toHaveProperty("topic");
+            expect(object).toHaveProperty("created_at");
+            expect(object).toHaveProperty("votes");
+            expect(object).toHaveProperty("article_img_url");
+            expect(object).toHaveProperty("comment_count");
+          });
+        });
+    });
+
+    test("GET 404: Should respond with an error if given a valid id but does not exist", () => {
+      return request(app)
+        .get("/api/articles/100?comment_count")
+        .expect(404)
+        .then((response) => {
+          expect(response.body.msg).toBe("Article not found");
+        });
+    });
+
+    test("GET 400: Should respond with an error if given a invalid id", () => {
+      return request(app)
+        .get("/api/articles/not-an-id?comment_count")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
         });
     });
   });
