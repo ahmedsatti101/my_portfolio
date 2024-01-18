@@ -504,7 +504,7 @@ describe("/api", () => {
         .expect(404);
     });
   });
-  describe.only("GET /api/users/:username", () => {
+  describe("GET /api/users/:username", () => {
     test("GET 200: Should get user by username", () => {
       return request(app)
         .get("/api/users/butter_bridge")
