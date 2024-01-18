@@ -4,6 +4,7 @@ const data = require("../db/data/test-data/index");
 const db = require("../db/connection");
 const app = require("../app");
 const endpointsFile = require("../endpoints.json");
+const { expect } = require("@jest/globals");
 
 beforeEach(() => {
   return seed(data);
@@ -501,6 +502,44 @@ describe("/api", () => {
       return request(app)
         .get("/api/articles?sort_by=created_at&order=colour")
         .expect(404);
+    });
+  });
+  describe.only("GET /api/users/:username", () => {
+    test("GET 200: Should get user by username", () => {
+      return request(app)
+        .get("/api/users/butter_bridge")
+        .expect(200)
+        .then(({ body }) => {
+          const { user } = body;
+          expect(user.length).toBe(1);
+          expect(Array.isArray(user)).toBe(true);
+          user.forEach((property) => {
+            expect(property).toHaveProperty("username");
+            expect(typeof property.username).toBe("string");
+            expect(property).toHaveProperty("avatar_url");
+            expect(typeof property.avatar_url).toBe("string");
+            expect(property).toHaveProperty("name");
+            expect(typeof property.name).toBe("string");
+          });
+        });
+    });
+
+    test("GET 404: Should respond with an error if given a user that does not exist", () => {
+      return request(app)
+        .get("/api/users/Karl")
+        .expect(404)
+        .then((response) => {
+          expect(response.body.msg).toBe("User not found");
+        });
+    });
+
+    test("GET 404: Should respond with an error if given a invalid user", () => {
+      return request(app)
+        .get("/api/users/23")
+        .expect(404)
+        .then((response) => {
+          expect(response.body.msg).toBe("User not found");
+        });
     });
   });
 });

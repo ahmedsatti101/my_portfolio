@@ -7,6 +7,7 @@ const {
   updateArticle,
   deletedComment,
   retrieveUsers,
+  retrieveUserByUsername,
 } = require("../models/app.model");
 const endpointsFile = require("../endpoints.json");
 
@@ -104,4 +105,16 @@ exports.getAllUsers = (req, res) => {
   retrieveUsers().then((users) => {
     res.status(200).send({ users });
   });
+};
+
+exports.getUserByUsername = (req, res, next) => {
+  const username = req.params.username;
+
+  retrieveUserByUsername(username)
+    .then((user) => {
+      res.status(200).send({ user });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };

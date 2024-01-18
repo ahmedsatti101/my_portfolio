@@ -54,7 +54,7 @@ exports.retrieveArticles = (topic, sortBy = "created_at", order = "desc") => {
     "body",
     "created_at",
     "votes",
-    "article_img_url"
+    "article_img_url",
   ];
 
   if (!validSortQueries.includes(sortBy)) {
@@ -171,4 +171,18 @@ exports.retrieveUsers = () => {
   return db.query(`SELECT * FROM users;`).then((result) => {
     return result.rows;
   });
+};
+
+exports.retrieveUserByUsername = (username) => {
+  return db
+    .query(`SELECT * FROM users WHERE username = $1;`, [username])
+    .then((result) => {
+      if (result.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "User not found",
+        });
+      }
+      return result.rows;
+    });
 };

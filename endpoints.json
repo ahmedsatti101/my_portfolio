@@ -17,7 +17,9 @@
   "GET /api/articles": {
     "description": "get all articles",
     "queries": [
-      "topic", "sort_by", "order"
+      "topic",
+      "sort_by",
+      "order"
     ],
     "exampleResponse": [
       {
@@ -207,6 +209,19 @@
           "comment_count": "11"
         }
       }
+    }
+  },
+  "GET /api/users/:username": {
+    "description": "returns a user by username",
+    "queries": [],
+    "exampleResponse": {
+      "user": [
+        {
+          "username": "butter_bridge",
+          "name": "jonny",
+          "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+        }
+      ]
     }
   }
 }
