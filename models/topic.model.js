@@ -39,7 +39,7 @@ exports.retrieveArticles = (topic) => {
   LEFT JOIN comments 
   ON articles.article_id = comments.article_id`;
 
-  if (topic) {
+  if (topic !== undefined) {
     queryValues.push(topic);
     queryStr += ` WHERE topic = $1`;
   }
