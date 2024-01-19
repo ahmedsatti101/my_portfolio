@@ -3,7 +3,7 @@ const {
   getAllTopics,
   getAllArticles,
   getAllUsers,
-} = require("./controllers/app.controller");
+} = require("../controllers/app.controller");
 const articleRouter = require("./article-router");
 const commentRouter = require("./comment-router");
 const userRouter = require("./user-router");
