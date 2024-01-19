@@ -227,7 +227,7 @@ describe("/api", () => {
         });
     });
 
-    test("POST 404: Should respond with an error if attempting to post comment with user that does not exist", () => {
+    test("POST 404: Should respond with an error if attempting to post comment with article that does not exist", () => {
       return request(app)
         .post("/api/articles/1/comments")
         .send({
@@ -623,7 +623,7 @@ describe("/api", () => {
         });
     });
 
-    test("PATCH 404: Should respond with an error if given a article valid id but does not exist", () => {
+    test("PATCH 404: Should respond with an error if given a comment valid id but does not exist", () => {
       return request(app)
         .patch("/api/comments/1000")
         .send({
@@ -633,6 +633,56 @@ describe("/api", () => {
         .then((response) => {
           expect(response.body.msg).toBe("Comment not found");
         });
+    });
+  });
+  describe("POST /articles", () => {
+    test("POST 201: Should add a new article and respond with the article", () => {
+      return request(app)
+        .post("/api/articles")
+        .send({
+          author: "rogersop",
+          title: "Why tested code is good code",
+          body: "Because that's what makes a good software developer good!",
+          topic: "paper",
+        })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.article_id).toBe(14);
+          expect(body.body).toBe("Because that's what makes a good software developer good!")
+          expect(body.title).toBe("Why tested code is good code");
+          expect(body.article_img_url).toBe("https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700");
+          expect(body.topic).toBe("paper");
+          expect(body.votes).toBe(0);
+          expect(typeof body.created_at).toBe("string");
+          expect(body.comment_count).toBe(0);
+        });
+    });
+
+    test("POST 400: Should respond with an error if an empty request body is sent", () => {
+      return request(app)
+        .post("/api/articles")
+        .send()
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("POST 400: Should respond with an error if one or more properties are missing from the request", () => {
+      return request(app)
+        .post("/api/articles")
+        .send({
+          author: "rogersop",
+          body: "This is working?"
+        })
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("GET 404: Should respond with an error if navigated to the wrong endpoint", () => {
+      return request(app).post("/api/article").expect(404);
     });
   });
 });
