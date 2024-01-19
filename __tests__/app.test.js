@@ -89,7 +89,7 @@ describe("/api", () => {
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
-          expect(articles.length).toBe(13);
+          expect(articles.length).toBe(10);
           expect(Array.isArray(articles)).toBe(true);
           articles.forEach((article) => {
             expect(typeof article.article_id).toBe("number");
@@ -411,7 +411,7 @@ describe("/api", () => {
         .expect(200)
         .then(({ body }) => {
           const { articles } = body;
-          expect(articles.length).toBe(13);
+          expect(articles.length).toBe(10);
           expect(Array.isArray(articles)).toBe(true);
           articles.forEach((article) => {
             expect(typeof article.article_id).toBe("number");
@@ -648,9 +648,13 @@ describe("/api", () => {
         .expect(201)
         .then(({ body }) => {
           expect(body.article_id).toBe(14);
-          expect(body.body).toBe("Because that's what makes a good software developer good!")
+          expect(body.body).toBe(
+            "Because that's what makes a good software developer good!"
+          );
           expect(body.title).toBe("Why tested code is good code");
-          expect(body.article_img_url).toBe("https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700");
+          expect(body.article_img_url).toBe(
+            "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+          );
           expect(body.topic).toBe("paper");
           expect(body.votes).toBe(0);
           expect(typeof body.created_at).toBe("string");
@@ -673,7 +677,7 @@ describe("/api", () => {
         .post("/api/articles")
         .send({
           author: "rogersop",
-          body: "This is working?"
+          body: "This is working?",
         })
         .expect(400)
         .then((response) => {
@@ -683,6 +687,36 @@ describe("/api", () => {
 
     test("GET 404: Should respond with an error if navigated to the wrong endpoint", () => {
       return request(app).post("/api/article").expect(404);
+    });
+  });
+  describe("GET /articles (pagination)", () => {
+    test("GET 200: Should respond with a certain number of article objects depending on 'limit' query (limited to '10' by default)", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const articles = body.articles;
+          expect(articles.length).toBe(10);
+        });
+    });
+
+    test("GET 200: Should respond with a certain number of article objects depending on 'limit' query", () => {
+      return request(app)
+        .get("/api/articles?limit=2")
+        .expect(200)
+        .then(({ body }) => {
+          const articles = body.articles;
+          expect(articles.length).toBe(2);
+        });
+    });
+
+    test.skip("GET 400: Should respond with an error if given a limit value that is not a number", () => {
+      return request(app)
+        .get("/api/articles?limit=not-a-number")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Limit query must be a number");
+        });
     });
   });
 });

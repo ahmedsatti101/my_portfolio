@@ -31,7 +31,21 @@ exports.retrieveArticleById = (article_id) => {
   });
 };
 
-exports.retrieveArticles = (topic, sortBy = "created_at", order = "desc") => {
+exports.retrieveArticles = (
+  topic,
+  sortBy = "created_at",
+  order = "desc",
+  limit = 10
+) => {
+
+  const parsedLimit = parseInt(limit)
+  if (parsedLimit === 0 || isNaN(parsedLimit)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Limit query must be a number"
+    });
+  }
+
   const queryValues = [];
   let queryStr = `
   SELECT articles.*, COUNT(comment_id) AS comment_count
@@ -45,6 +59,12 @@ exports.retrieveArticles = (topic, sortBy = "created_at", order = "desc") => {
   }
 
   queryStr += ` GROUP BY articles.article_id ORDER BY articles.${sortBy} ${order}`;
+
+  if (limit === 10) {
+    queryStr += ` LIMIT 10`;
+  } else {
+    queryStr += ` LIMIT ${limit}`;
+  }
 
   const validSortQueries = [
     "article_id",
