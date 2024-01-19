@@ -3,6 +3,7 @@ const {
   getAllTopics,
   getAllArticles,
   getAllUsers,
+  postArticle
 } = require("../controllers/app.controller");
 const articleRouter = require("./article-router");
 const commentRouter = require("./comment-router");
@@ -11,6 +12,7 @@ const userRouter = require("./user-router");
 apiRouter.get("/topics", getAllTopics);
 
 apiRouter.get("/articles", getAllArticles);
+apiRouter.post("/articles", postArticle)
 apiRouter.use("/articles", articleRouter);
 
 apiRouter.get("/users", getAllUsers);

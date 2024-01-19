@@ -207,3 +207,20 @@ exports.updateComment = (voteNum, comment_id) => {
       return result.rows;
     });
 };
+
+exports.addArticle = (newArticle) => {
+  return db
+    .query(
+      `
+  INSERT INTO articles
+    (author, title, body, topic)
+  VALUES
+    ($1, $2, $3, $4)
+  RETURNING *;`,
+      [newArticle.author, newArticle.title, newArticle.body, newArticle.topic]
+    )
+    .then((result) => {
+      result.rows[0].comment_count = 0;
+      return result.rows[0];
+    });
+};
