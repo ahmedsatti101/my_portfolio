@@ -4,7 +4,7 @@ const data = require("../db/data/test-data/index");
 const db = require("../db/connection");
 const app = require("../app");
 const endpointsFile = require("../endpoints.json");
-const { expect } = require("@jest/globals");
+const { expect, test, describe } = require("@jest/globals");
 
 beforeEach(() => {
   return seed(data);
@@ -336,7 +336,7 @@ describe("/api", () => {
         });
     });
   });
-  describe("DELETE /api/comments/:comment_id", () => {
+  describe("DELETE /comments/:comment_id", () => {
     test("DELETE 204: Should delete given comment by comment_id", () => {
       return request(app).delete("/api/comments/1").expect(204);
     });
@@ -355,7 +355,7 @@ describe("/api", () => {
       return request(app).delete("/api/comments/100").expect(204);
     });
   });
-  describe("GET /api/users", () => {
+  describe("GET /users", () => {
     test("GET 200: Should respond with an array of all user object with the correct properties", () => {
       return request(app)
         .get("/api/users")
@@ -379,7 +379,7 @@ describe("/api", () => {
       return request(app).get("/api/user").expect(404);
     });
   });
-  describe("GET /api/articles?topic=", () => {
+  describe("GET /articles?topic=", () => {
     test("GET 200: filters the data by passed topic query parameter of cats", () => {
       return request(app)
         .get("/api/articles?topic=cats")
@@ -437,7 +437,7 @@ describe("/api", () => {
         });
     });
   });
-  describe("GET /api/articles/:article_id (comment_count)", () => {
+  describe("GET /articles/:article_id (comment_count)", () => {
     test("GET 200: Should respond with the comment count property for an article array", () => {
       return request(app)
         .get("/api/articles/5")
@@ -470,7 +470,7 @@ describe("/api", () => {
         });
     });
   });
-  describe("GET /api/articles (sorting queries)", () => {
+  describe("GET /articles (sorting queries)", () => {
     test("GET 200: Will accept a sort_by query parameter that sorts to created_at by default in a descending order", () => {
       return request(app)
         .get("/api/articles?sort_by=created_at")
@@ -504,7 +504,7 @@ describe("/api", () => {
         .expect(404);
     });
   });
-  describe("GET /api/users/:username", () => {
+  describe("GET /users/:username", () => {
     test("GET 200: Should get user by username", () => {
       return request(app)
         .get("/api/users/butter_bridge")
@@ -539,6 +539,99 @@ describe("/api", () => {
         .expect(404)
         .then((response) => {
           expect(response.body.msg).toBe("User not found");
+        });
+    });
+  });
+  describe("PATCH /comments/:comment_id", () => {
+    test("PATCH 200: Should increment the votes and respond with updated comment array", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({
+          inc_votes: 2,
+        })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.length).toBe(1);
+          expect(Array.isArray(body)).toBe(true);
+          body.forEach((comment) => {
+            expect(typeof comment.comment_id).toBe("number");
+            expect(comment.comment_id).toBe(1);
+            expect(typeof comment.body).toBe("string");
+            expect(typeof comment.article_id).toBe("number");
+            expect(typeof comment.author).toBe("string");
+            expect(comment.votes).toBe(18);
+            expect(typeof comment.votes).toBe("number");
+            expect(typeof comment.created_at).toBe("string");
+          });
+        });
+    });
+
+    test("PATCH 200: Should decrement the votes and respond with updated comment array", () => {
+      return request(app)
+        .patch("/api/comments/3")
+        .send({
+          inc_votes: -60,
+        })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.length).toBe(1);
+          expect(Array.isArray(body)).toBe(true);
+          body.forEach((comment) => {
+            expect(typeof comment.comment_id).toBe("number");
+            expect(comment.comment_id).toBe(3);
+            expect(typeof comment.body).toBe("string");
+            expect(typeof comment.article_id).toBe("number");
+            expect(typeof comment.author).toBe("string");
+            expect(comment.votes).toBe(40);
+            expect(typeof comment.votes).toBe("number");
+            expect(typeof comment.created_at).toBe("string");
+          });
+        });
+    });
+
+    test("PATCH 400: Should respond with an error if an empty request body is sent", () => {
+      return request(app)
+        .patch("/api/comments/3")
+        .send()
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("PATCH 400: Should respond with an error if request body is sent the wrong data type instead of an integer", () => {
+      return request(app)
+        .patch("/api/comments/16")
+        .send({
+          inc_votes: "This is working?",
+        })
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("PATCH 400: Should respond with an error if passed an invalid id", () => {
+      return request(app)
+        .patch("/api/comments/not-an-id")
+        .send({
+          inc_votes: 56,
+        })
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("PATCH 404: Should respond with an error if given a article valid id but does not exist", () => {
+      return request(app)
+        .patch("/api/comments/1000")
+        .send({
+          inc_votes: 5,
+        })
+        .expect(404)
+        .then((response) => {
+          expect(response.body.msg).toBe("Comment not found");
         });
     });
   });

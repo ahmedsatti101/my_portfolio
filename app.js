@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const { getAllEndpoints } = require("./controllers/app.controller");
-const apiRouter = require("./api-router");
+const apiRouter = require("./routers/api-router");
 
 app.use(express.json());
 

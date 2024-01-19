@@ -8,6 +8,7 @@ const {
   deletedComment,
   retrieveUsers,
   retrieveUserByUsername,
+  updateComment
 } = require("../models/app.model");
 const endpointsFile = require("../endpoints.json");
 
@@ -118,3 +119,14 @@ exports.getUserByUsername = (req, res, next) => {
       next(err);
     });
 };
+
+exports.patchComment = (req, res, next) => {
+  const updatedVotes = req.body.inc_votes;
+  const updatedCommentId = req.params.comment_id;
+
+  updateComment(updatedVotes, updatedCommentId).then((result) => {
+    res.status(200).send(result)
+  }).catch(err => {
+    next(err);
+  })
+}
