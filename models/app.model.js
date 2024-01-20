@@ -297,3 +297,16 @@ exports.addArticle = (newArticle) => {
       return result.rows[0];
     });
 };
+
+exports.addTopic = (newTopic) => {
+  return db.query(`
+  INSERT INTO topics
+    (slug, description)
+  VALUES
+    ($1, $2)
+  RETURNING *;`, [newTopic.slug, newTopic.description]
+  )
+  .then((result) => {
+    return result.rows[0];
+  })
+}

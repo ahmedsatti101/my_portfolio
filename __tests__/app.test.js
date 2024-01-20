@@ -819,4 +819,45 @@ describe("/api", () => {
         });
     });
   });
+  describe("POST /topics", () => {
+    test("POST 201: Should send request body with slug and description properties and respond with the sent request", () => {
+      return request(app)
+        .post("/api/topics")
+        .send({
+          slug: "coding",
+          description: "about coding",
+        })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.slug).toEqual("coding");
+          expect(body.description).toEqual("about coding")
+          });
+    });
+
+    test("POST 400: Should respond with an error if an empty request body is sent", () => {
+      return request(app)
+        .post("/api/topics")
+        .send()
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("POST 400: Should respond with an error if slug or description is missing from the sent request", () => {
+      return request(app)
+        .post("/api/topics")
+        .send({
+          description: "This is working?",
+        })
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test('POST 404: Should respond with an error if attempting to post a topic to wrong endpoint', () => {
+      return request(app).post('/api/topic').expect(404)
+    })
+  });
 });
