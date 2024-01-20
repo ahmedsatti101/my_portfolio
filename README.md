@@ -7,12 +7,14 @@ You will need to clone the repository to your machine and add two `.env` files t
 # Where can I see the project?
 [Here](https://portfolio-web-service-n7kk.onrender.com/api).
 
-# How do I use i?
+# How do I use it?
 You can navigate to several endpoints including:
 - `/api`
 - `/api/topics`
-- `/api/articles` => You can make a topic query to this endpoint with `/api/articles?topic=<topic here>`, not providing a topic will display all articles
+- `/api/articles` => You can query topics, limiting results to a certain number (limited to 10 by default), etc. More info can be found in the `endpoints.json` about this endpoint.
 - `/api/articles/:article_id`
 - `/api/articles/:article_id/comments` => View the number of comments for an article
+- `/api/users`
+- `/api/users/:username`
 
 Info on each endpoint can be found in the `endpoints.json` file.
