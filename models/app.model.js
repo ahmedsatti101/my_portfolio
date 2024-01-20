@@ -299,14 +299,35 @@ exports.addArticle = (newArticle) => {
 };
 
 exports.addTopic = (newTopic) => {
-  return db.query(`
+  return db
+    .query(
+      `
   INSERT INTO topics
     (slug, description)
   VALUES
     ($1, $2)
-  RETURNING *;`, [newTopic.slug, newTopic.description]
-  )
-  .then((result) => {
-    return result.rows[0];
-  })
-}
+  RETURNING *;`,
+      [newTopic.slug, newTopic.description]
+    )
+    .then((result) => {
+      return result.rows[0];
+    });
+};
+
+exports.deletedArticle = (article_id) => {
+  return db
+    .query(
+      `WITH deleted_comments AS (
+        DELETE FROM comments
+        WHERE article_id = $1
+        RETURNING article_id
+      )
+      DELETE FROM articles
+      WHERE article_id IN (SELECT article_id FROM deleted_comments);
+      `,
+      [article_id]
+    )
+    .then((result) => {
+      return result.rows;
+    });
+};
