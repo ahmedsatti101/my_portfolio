@@ -31,7 +31,30 @@ exports.retrieveArticleById = (article_id) => {
   });
 };
 
-exports.retrieveArticles = (topic, sortBy = "created_at", order = "desc") => {
+exports.retrieveArticles = (
+  topic,
+  sortBy = "created_at",
+  order = "desc",
+  limit = 10,
+  page = 1
+) => {
+  const parsedLimit = parseInt(limit);
+  const pageNumber = parseInt(page);
+
+  if (parsedLimit === 0 || isNaN(parsedLimit)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Limit query must be a number",
+    });
+  }
+
+  if (pageNumber === 0 || isNaN(pageNumber)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Page query must be a number",
+    });
+  }
+
   const queryValues = [];
   let queryStr = `
   SELECT articles.*, COUNT(comment_id) AS comment_count
@@ -45,6 +68,12 @@ exports.retrieveArticles = (topic, sortBy = "created_at", order = "desc") => {
   }
 
   queryStr += ` GROUP BY articles.article_id ORDER BY articles.${sortBy} ${order}`;
+
+  if (limit === 10) {
+    queryStr += ` LIMIT 10`;
+  } else {
+    queryStr += ` LIMIT ${limit}`;
+  }
 
   const validSortQueries = [
     "article_id",
@@ -68,40 +97,62 @@ exports.retrieveArticles = (topic, sortBy = "created_at", order = "desc") => {
 
   if (!validOrderQueries.includes(order)) {
     return Promise.reject({
-      status: 404,
-      msg: "Not found",
+      status: 400,
+      msg: "Bad request",
     });
   }
 
-  return db.query(queryStr, queryValues).then((result) => {
-    return result.rows;
-  });
+  if (pageNumber === undefined) {
+    return db.query(queryStr, queryValues).then((result) => {
+      return { articles: result.rows, total_count: result.rows.length };
+    });
+  } else {
+    queryStr += ` OFFSET (${pageNumber}-1) * ${limit}`;
+    return db.query(queryStr, queryValues).then((result) => {
+      return { articles: result.rows, total_count: result.rows.length };
+    });
+  }
 };
 
-exports.retrieveArticleComments = (article_id) => {
-  return db
-    .query(
-      `SELECT
-          comments.comment_id,
-          comments.votes,
-          comments.created_at,
-          comments.author,
-          comments.body,
-          comments.article_id
-        FROM
-          comments
-        JOIN
-          users ON comments.author = users.username
-        JOIN
-          articles ON comments.article_id = articles.article_id
-        WHERE
-          comments.article_id = $1
-        ORDER BY
-          comments.created_at DESC;
-      `,
-      [article_id]
-    )
-    .then((result) => {
+exports.retrieveArticleComments = (article_id, limit = 10, page = 1) => {
+  const parsedLimit = parseInt(limit);
+  const pageNumber = parseInt(page);
+
+  if (parsedLimit === 0 || isNaN(parsedLimit)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Limit query must be a number",
+    });
+  }
+
+  if (pageNumber === 0 || isNaN(pageNumber)) {
+    return Promise.reject({
+      status: 400,
+      msg: "Page query must be a number",
+    });
+  }
+
+  let queryStr = `SELECT
+    comments.comment_id,
+    comments.votes,
+    comments.created_at,
+    comments.author,
+    comments.body,
+    comments.article_id
+  FROM
+    comments
+  JOIN
+    users ON comments.author = users.username
+  JOIN
+    articles ON comments.article_id = articles.article_id
+  WHERE
+    comments.article_id = $1
+  ORDER BY
+    comments.created_at DESC 
+  LIMIT $2`;
+
+  if (pageNumber === undefined) {
+    return db.query(queryStr, [article_id, parsedLimit]).then((result) => {
       if (result.rows.length === 0) {
         return Promise.reject({
           status: 404,
@@ -110,6 +161,28 @@ exports.retrieveArticleComments = (article_id) => {
       }
       return result.rows;
     });
+  } else {
+    queryStr += ` OFFSET (${pageNumber}-1) * ${limit}`;
+    return db.query(queryStr, [article_id, parsedLimit]).then((result) => {
+      if (result.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "Article not found",
+        });
+      }
+      return result.rows;
+    });
+  }
+
+  // return db.query(queryStr, [article_id, parsedLimit]).then((result) => {
+  //   if (result.rows.length === 0) {
+  //     return Promise.reject({
+  //       status: 404,
+  //       msg: "Article not found",
+  //     });
+  //   }
+  //   return result.rows;
+  // });
 };
 
 exports.addComment = ({ body, article_id, author }) => {
