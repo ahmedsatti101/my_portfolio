@@ -830,8 +830,8 @@ describe("/api", () => {
         .expect(201)
         .then(({ body }) => {
           expect(body.slug).toEqual("coding");
-          expect(body.description).toEqual("about coding")
-          });
+          expect(body.description).toEqual("about coding");
+        });
     });
 
     test("POST 400: Should respond with an error if an empty request body is sent", () => {
@@ -856,8 +856,26 @@ describe("/api", () => {
         });
     });
 
-    test('POST 404: Should respond with an error if attempting to post a topic to wrong endpoint', () => {
-      return request(app).post('/api/topic').expect(404)
-    })
+    test("POST 404: Should respond with an error if attempting to post a topic to wrong endpoint", () => {
+      return request(app).post("/api/topic").expect(404);
+    });
+  });
+  describe("DELETE /api/articles/:article_id", () => {
+    test("DELETE 204: Should delete given article by article_id and its comments", () => {
+      return request(app).delete("/api/articles/2").expect(204);
+    });
+
+    test("DELETE 400: Should respond with an error if given an invalid article id", () => {
+      return request(app)
+        .delete("/api/articles/not-an-id")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
+    });
+
+    test("DELETE 204: Should respond with a message if given a valid id but does not exist", () => {
+      return request(app).delete("/api/articles/120").expect(204)
+    });
   });
 });

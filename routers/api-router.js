@@ -14,7 +14,7 @@ apiRouter.get("/topics", getAllTopics);
 apiRouter.post("/topics", postTopic);
 
 apiRouter.get("/articles", getAllArticles);
-apiRouter.post("/articles", postArticle)
+apiRouter.post("/articles", postArticle);
 apiRouter.use("/articles", articleRouter);
 
 apiRouter.get("/users", getAllUsers);

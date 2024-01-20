@@ -10,7 +10,8 @@ const {
   retrieveUserByUsername,
   updateComment,
   addArticle,
-  addTopic
+  addTopic,
+  deletedArticle,
 } = require("../models/app.model");
 const endpointsFile = require("../endpoints.json");
 
@@ -155,9 +156,23 @@ exports.postArticle = (req, res, next) => {
 exports.postTopic = (req, res, next) => {
   const newTopic = req.body;
 
-  addTopic(newTopic).then((topic) => {
-    res.status(201).send(topic)
-  }).catch(err => {
-    next(err);
-  })
-}
+  addTopic(newTopic)
+    .then((topic) => {
+      res.status(201).send(topic);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.deleteArticleById = (req, res, next) => {
+  const article_id = req.params.article_id;
+
+  deletedArticle(article_id)
+    .then((result) => {
+      res.status(204).send(result);
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
