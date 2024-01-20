@@ -819,7 +819,7 @@ describe("/api", () => {
         });
     });
   });
-  describe.only("POST /topics", () => {
+  describe("POST /topics", () => {
     test("POST 201: Should send request body with slug and description properties and respond with the sent request", () => {
       return request(app)
         .post("/api/topics")
