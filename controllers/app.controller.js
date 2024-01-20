@@ -10,6 +10,7 @@ const {
   retrieveUserByUsername,
   updateComment,
   addArticle,
+  addTopic
 } = require("../models/app.model");
 const endpointsFile = require("../endpoints.json");
 
@@ -150,3 +151,13 @@ exports.postArticle = (req, res, next) => {
       next(err);
     });
 };
+
+exports.postTopic = (req, res, next) => {
+  const newTopic = req.body;
+
+  addTopic(newTopic).then((topic) => {
+    res.status(201).send(topic)
+  }).catch(err => {
+    next(err);
+  })
+}

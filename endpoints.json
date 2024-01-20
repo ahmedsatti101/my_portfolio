@@ -263,5 +263,17 @@
         }
       ]
     }
+  },
+  "POST /api/topics": {
+    "description": "add a new topic",
+    "queries": [],
+    "exampleResponse": {
+      "topic": [
+        {
+          "slug": "coding",
+          "description": "about coding"
+        }
+      ]
+    }
   }
 }
