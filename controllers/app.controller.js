@@ -39,10 +39,11 @@ exports.getAllArticles = (req, res, next) => {
   const sortBy = req.query.sort_by;
   const order = req.query.order;
   const limit = req.query.limit;
+  const page = req.query.p;
 
-  retrieveArticles(topic, sortBy, order, limit)
+  retrieveArticles(topic, sortBy, order, limit, page)
     .then((articles) => {
-      res.status(200).send({ articles });
+      res.status(200).send(articles);
     })
     .catch((err) => {
       next(err);
@@ -51,9 +52,12 @@ exports.getAllArticles = (req, res, next) => {
 
 exports.getArticleComments = (req, res, next) => {
   const { article_id } = req.params;
-  retrieveArticleComments(article_id)
-    .then((article) => {
-      res.status(200).send({ article });
+  const limit = req.query.limit;
+  const page = req.query.p;
+
+  retrieveArticleComments(article_id, limit, page)
+    .then((comments) => {
+      res.status(200).send({ comments });
     })
     .catch((err) => {
       next(err);

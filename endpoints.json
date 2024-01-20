@@ -19,7 +19,9 @@
     "queries": [
       "topic",
       "sort_by",
-      "order"
+      "order",
+      "limit",
+      "p (page)"
     ],
     "exampleResponse": [
       {
@@ -82,7 +84,10 @@
   },
   "GET /api/articles/:article_id/comments": {
     "description": "get all comments for an article",
-    "queries": [],
+    "queries": [
+      "limit",
+      "p (page)"
+    ],
     "exampleResponse": {
       "comment": [
         {

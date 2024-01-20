@@ -126,10 +126,10 @@ describe("/api", () => {
         .get("/api/articles/1/comments")
         .expect(200)
         .then(({ body }) => {
-          const { article } = body;
-          expect(article.length).toBe(11);
-          expect(Array.isArray(article)).toBe(true);
-          article.forEach((response) => {
+          const { comments } = body;
+          expect(comments.length).toBe(10);
+          expect(Array.isArray(comments)).toBe(true);
+          comments.forEach((response) => {
             expect(typeof response.comment_id).toBe("number");
             expect(typeof response.votes).toBe("number");
             expect(typeof response.created_at).toBe("string");
@@ -145,8 +145,8 @@ describe("/api", () => {
         .get("/api/articles/3/comments")
         .expect(200)
         .then(({ body }) => {
-          const { article } = body;
-          expect(article).toBeSortedBy("created_at", {
+          const { comments } = body;
+          expect(comments).toBeSortedBy("created_at", {
             descending: true,
           });
         });
@@ -351,7 +351,7 @@ describe("/api", () => {
         });
     });
 
-    test("DELETE 404: Should respond with an error if given a valid id but does not exist", () => {
+    test("DELETE 204: Should respond with an error if given a valid id but does not exist", () => {
       return request(app).delete("/api/comments/100").expect(204);
     });
   });
@@ -501,7 +501,10 @@ describe("/api", () => {
     test("GET 400: sends an appropriate status and error message when given an invalid value for order query parameter", () => {
       return request(app)
         .get("/api/articles?sort_by=created_at&order=colour")
-        .expect(404);
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Bad request");
+        });
     });
   });
   describe("GET /users/:username", () => {
@@ -710,12 +713,109 @@ describe("/api", () => {
         });
     });
 
-    test.skip("GET 400: Should respond with an error if given a limit value that is not a number", () => {
+    test("GET 400: Should respond with an error if given a limit value that is not a number", () => {
       return request(app)
         .get("/api/articles?limit=not-a-number")
         .expect(400)
         .then((response) => {
           expect(response.body.msg).toBe("Limit query must be a number");
+        });
+    });
+
+    test("GET 200: Should respond with the correct articles when specifying a page number (p)", () => {
+      return request(app)
+        .get("/api/articles?p=2")
+        .expect(200)
+        .then(({ body }) => {
+          const articles = body.articles;
+          expect(articles.length).toBe(3);
+        });
+    });
+
+    test("GET 200: Should respond with the correct articles when specifying a page number and a limit", () => {
+      return request(app)
+        .get("/api/articles?p=2&limit=5")
+        .expect(200)
+        .then(({ body }) => {
+          const articles = body.articles;
+          expect(articles.length).toBe(5);
+        });
+    });
+
+    test("GET 400: Should respond with an error if given a page value that is not a number", () => {
+      return request(app)
+        .get("/api/articles?p=not-a-number&limit=5")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Page query must be a number");
+        });
+    });
+
+    test("GET 200: Should respond with a total_count property displaying number of articles in a page", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.total_count).toEqual(body.articles.length);
+        });
+    });
+  });
+  describe("GET /articles/:article_id/comments (pagination)", () => {
+    test("GET 200: Should respond with a certain number of comment objects for an article depending on 'limit' query (limited to '10' by default)", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const comments = body.comments;
+          expect(comments.length).toBe(10);
+        });
+    });
+
+    test("GET 200: Should respond with a certain number of comment objects for an article depending on 'limit' query", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=3")
+        .expect(200)
+        .then(({ body }) => {
+          const comments = body.comments;
+          expect(comments.length).toBe(3);
+        });
+    });
+
+    test("GET 400: Should respond with an error if given a limit value that is not a number", () => {
+      return request(app)
+        .get("/api/articles/1/comments?limit=not-a-number")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Limit query must be a number");
+        });
+    });
+
+    test("GET 200: Should respond with the correct comments for an article when specifying a page number (p)", () => {
+      return request(app)
+        .get("/api/articles/1/comments?p=2")
+        .expect(200)
+        .then(({ body }) => {
+          const comments = body.comments;
+          expect(comments.length).toBe(1);
+        });
+    });
+
+    test("GET 200: Should respond with the correct comments when specifying a page number and a limit", () => {
+      return request(app)
+        .get("/api/articles/1/comments?p=2&limit=5")
+        .expect(200)
+        .then(({ body }) => {
+          const comments = body.comments;
+          expect(comments.length).toBe(5);
+        });
+    });
+
+    test("GET 400: Should respond with an error if given a page value that is not a number", () => {
+      return request(app)
+        .get("/api/articles/1/comments?p=not-a-number&limit=5")
+        .expect(400)
+        .then((response) => {
+          expect(response.body.msg).toBe("Page query must be a number");
         });
     });
   });
